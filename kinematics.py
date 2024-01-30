@@ -2,6 +2,9 @@ import math
 import constants
 import numpy as np
 
+def normalize_angle(angle_deg):
+    return (angle_deg + 180.0) % 360.0 - 180.0
+
 def computeDK(theta1, theta2, theta3):
     theta1_corrected = constants.THETA1_MOTOR_SIGN * (theta1 * constants.TO_DEGREES)
     theta2_corrected = (constants.THETA2_MOTOR_SIGN * theta2 - constants.theta2Correction) * constants.TO_DEGREES
