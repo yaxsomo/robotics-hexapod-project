@@ -59,6 +59,10 @@ def computeIK(p3_x, p3_y, p3_z):
 
 
 
+# TODO : Create the 'rotation_2d' function
+
+
+
 def triangle(triangle_x, triangle_z, triangle_h, triangle_w, t, duration):
 
     A = [triangle_x, 0, triangle_h + triangle_z]
