@@ -27,15 +27,15 @@ if __name__ == '__main__':
         case "robot":
             print("Robot Mode")
             constants.set_constants(constants.SOFTMODE.PHANTOMX)
+        case "arm":
+            print("Arm Mode")
+            constants.set_constants(constants.SOFTMODE.PHANTOMX)
         case "simulation":
             print("Simulation Mode")
             constants.set_constants(constants.SOFTMODE.PHANTOMX_SIMULATION)
             simulation.setup_simulation(args.kinematics)
             simulation.setup_controls()
             simulation.execute()
-        case "arm":
-            print("Arm Mode")
-            constants.set_constants(constants.SOFTMODE.ARM_SIMULATION)
         case "complete":
             print("Complete Mode (Not handled yet, Exiting...)")
         case _:
