@@ -60,6 +60,7 @@ def computeIK(p3_x, p3_y, p3_z):
 
 
 # TODO : Create the 'rotation_2d' function
+# TODO : Create the 'computeDKDetailed' function
 
 
 
