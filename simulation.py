@@ -13,6 +13,7 @@ crosses = None
 controls = None
 sim = None
 state = None
+leg_center_pos = [0.1248, -0.06164, 0.001116 + 0.5]
 
 def to_pybullet_quaternion(roll, pitch, yaw, degrees=False):
     # q = Quaternion.from_euler(roll, pitch, yaw, degrees=degrees)
@@ -76,7 +77,7 @@ def execute():
             )
             for i, pt in enumerate(points):
                 leg_angle = -math.pi / 4
-                T = kinematics.rotaton_2D(pt[0], pt[1], pt[2], leg_angle)
+                T = kinematics.rotation_2d(pt[0], pt[1], pt[2], leg_angle)
                 T = [T[0] + leg_center_pos[0], T[1] + leg_center_pos[1], T[2] + leg_center_pos[2]]
                 p.resetBasePositionAndOrientation(
                     crosses[i], T, to_pybullet_quaternion(0, 0, leg_angle)
@@ -91,9 +92,12 @@ def execute():
                 continue
             state = sim.setJoints(targets)
         elif simulation_mode == "inverse":
-            x = p.readUserDebugParameter(controls["target_x"])
-            y = p.readUserDebugParameter(controls["target_y"])
-            z = p.readUserDebugParameter(controls["target_z"])
+            try:
+                x = p.readUserDebugParameter(controls["target_x"])
+                y = p.readUserDebugParameter(controls["target_y"])
+                z = p.readUserDebugParameter(controls["target_z"])
+            except Exception as e:
+                continue
             alphas = kinematics.computeIK(x, y, z)
             targets["j_c1_rf"] = alphas[0]
             targets["j_thigh_rf"] = alphas[1]
@@ -101,10 +105,10 @@ def execute():
             state = sim.setJoints(targets)
             sim.setRobotPose([0, 0, 0.5], [0, 0, 0, 1])
             leg_angle = -math.pi / 4
-            T = kinematics.rotaton_2D(x, y, z, leg_angle)
+            T = kinematics.rotation_2d(x, y, z, leg_angle)
             T = [T[0] + leg_center_pos[0], T[1] + leg_center_pos[1], T[2] + leg_center_pos[2]]
             p.resetBasePositionAndOrientation(
-                cross, T, to_pybullet_quaternion(0, 0, leg_angle)
+                cross[0], T, to_pybullet_quaternion(0, 0, leg_angle)
             )
         sim.tick()
 
@@ -112,8 +116,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", "-m", type=str, default="direct", help="test")
     args = parser.parse_args()
-    
-    leg_center_pos = [0.1248, -0.06164, 0.001116 + 0.5]
     
     setup_simulation(args.mode)
     setup_controls()
