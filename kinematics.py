@@ -2,11 +2,22 @@ import math
 import constants
 import numpy as np
 
-def normalize_angle(angle_deg):
-    return (angle_deg + 180.0) % 360.0 - 180.0
+def normalize_angle(angle):
+    in_range = -math.pi < angle < math.pi
+    match in_range:
+        case True:
+            return angle
+        case False:
+            angle = angle % (math.pi * 2)
+            is_exceeding_pi = angle > math.pi
+            if(is_exceeding_pi):
+                return -math.pi * 2 + angle
+            else:
+                return angle
+
 
 def computeDK(theta1, theta2, theta3):
-    theta1_corrected = constants.THETA1_MOTOR_SIGN * (theta1 * constants.TO_DEGREES)
+    theta1_corrected = constants.THETA1_MOTOR_SIGN * theta1 * constants.TO_DEGREES
     theta2_corrected = (constants.THETA2_MOTOR_SIGN * theta2 - constants.theta2Correction) * constants.TO_DEGREES
     theta3_corrected = (constants.THETA3_MOTOR_SIGN * theta3 - constants.theta3Correction) * constants.TO_DEGREES
     
@@ -51,15 +62,20 @@ def computeIK(p3_x, p3_y, p3_z):
     theta2 =  a + beta
     theta3 =  math.pi + alpha
 
-    theta1_corrected = constants.THETA1_MOTOR_SIGN * (theta1 * constants.TO_DEGREES)
-    theta2_corrected = (constants.THETA2_MOTOR_SIGN * theta2 - constants.theta2Correction) * constants.TO_DEGREES
-    theta3_corrected = (constants.THETA3_MOTOR_SIGN * theta3 - constants.theta3Correction) * constants.TO_DEGREES
+    theta1_corrected = normalize_angle(constants.THETA1_MOTOR_SIGN * theta1)
+    theta2_corrected = normalize_angle(constants.THETA2_MOTOR_SIGN * (theta2 + constants.theta2Correction))
+    theta3_corrected = normalize_angle(constants.THETA3_MOTOR_SIGN * (theta3 + constants.theta3Correction))
     return [theta1_corrected, theta2_corrected, theta3_corrected]
 
 
+def rotation_2d(x, y, z, theta):
+    x_transformed = x * math.cos(theta) - y * math.sin(theta)
+    y_transformed = x * math.sin(theta) + y * math.cos(theta)
+
+    return [x_transformed, y_transformed, z]
 
 
-# TODO : Create the 'rotation_2d' function
+
 # TODO : Create the 'computeDKDetailed' function
 
 
