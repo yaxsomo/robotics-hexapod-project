@@ -14,6 +14,8 @@ controls = None
 sim = None
 state = None
 leg_center_pos = [0.1248, -0.06164, 0.001116 + 0.5]
+bx = 0.07
+bz = 0.25
 
 def to_pybullet_quaternion(roll, pitch, yaw, degrees=False):
     # q = Quaternion.from_euler(roll, pitch, yaw, degrees=degrees)
@@ -53,10 +55,17 @@ def setup_controls():
                 controls_setup[name] = p.addUserDebugParameter(name, -math.pi, math.pi, 0)
     elif simulation_mode == "inverse":
         cross = [p.loadURDF("target2/robot.urdf")]
-        alphas = kinematics.computeDK(0, 0, 0)
+        pre_conv = kinematics.computeIK(0.4, 0, 0)
+        alphas = kinematics.computeDK(pre_conv[0], pre_conv[1], pre_conv[2])
         controls_setup["target_x"] = p.addUserDebugParameter("target_x", -0.4, 0.4, alphas[0])
         controls_setup["target_y"] = p.addUserDebugParameter("target_y", -0.4, 0.4, alphas[1])
         controls_setup["target_z"] = p.addUserDebugParameter("target_z", -0.4, 0.4, alphas[2])
+    elif simulation_mode == "triangle":
+        controls_setup["triangle_x"] = p.addUserDebugParameter("triangle_x", 0.01, 0.8, 0.4)
+        controls_setup["triangle_z"] = p.addUserDebugParameter("triangle_z", -0.2, 0.3, 0)
+        controls_setup["triangle_h"] = p.addUserDebugParameter("triangle_h", 0.01, 0.3, 0.1)
+        controls_setup["triangle_w"] = p.addUserDebugParameter("triangle_w", 0.01, 0.3, 0.2)
+        controls_setup["triangle_duration"] = p.addUserDebugParameter("triangle_duration", 0.01, 10, 3)
     controls = controls_setup
 
 def execute():
@@ -110,6 +119,28 @@ def execute():
             p.resetBasePositionAndOrientation(
                 cross[0], T, to_pybullet_quaternion(0, 0, leg_angle)
             )
+        elif simulation_mode == "triangle":
+            try:
+                x = p.readUserDebugParameter(controls["triangle_x"])
+                z = p.readUserDebugParameter(controls["triangle_z"])
+                h = p.readUserDebugParameter(controls["triangle_h"])
+                w = p.readUserDebugParameter(controls["triangle_w"])
+                duration = p.readUserDebugParameter(controls["triangle_duration"])
+            except Exception as e:
+                continue
+            alphas = kinematics.triangle(x, z, h, w, sim.t, duration)
+            targets = {
+                "j_c1_rf": alphas[0],
+                "j_thigh_rf": alphas[1],
+                "j_tibia_rf": alphas[2],
+            }
+            
+            pos = kinematics.computeDK(alphas[0], alphas[1], alphas[2])
+            pos[0] += bx
+            pos[2] += bz
+            sim.addDebugPosition(pos, duration=3)
+            sim.setJoints(targets)
+        
         sim.tick()
 
 if __name__ == "__main__":
