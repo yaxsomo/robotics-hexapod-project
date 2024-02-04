@@ -18,8 +18,8 @@ if __name__ == '__main__':
         "-k",
         type=str,
         default="direct",
-        choices=["direct", "inverse", "frozen-direct"],
-        help="Kinematics for simulation: direct, inverse, frozen-direct",
+        choices=["direct", "inverse", "frozen-direct","triangle"],
+        help="Kinematics for simulation: direct, inverse, frozen-direct, triangle",
     )
     args = parser.parse_args()
 
