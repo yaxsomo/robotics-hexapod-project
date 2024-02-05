@@ -1,42 +1,23 @@
 import argparse
 import constants
 import simulation
+import threading
+import menu
+import control
 
+def start_thread(thread_id):
+    simulation_thread = threading.Thread(target=simulation.execute())
+    get_tick_thread = threading.Thread(target=None)
+    robot_thread = threading.Thread(target=None)
+
+    match thread_id:
+        case 1:
+            simulation_thread.start()         
+        case 2:
+            get_tick_thread.start()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--mode",
-        "-m",
-        type=str,
-        default="robot",
-        choices=["robot", "simulation", "arm", "complete"],
-        help="Available modes: robot, simulation, arm, complete",
-    )
-    parser.add_argument(
-        "--kinematics",
-        "-k",
-        type=str,
-        default="direct",
-        choices=["direct", "inverse", "frozen-direct","triangle"],
-        help="Kinematics for simulation: direct, inverse, frozen-direct, triangle",
-    )
-    args = parser.parse_args()
+    menu.clear_screen()
+    main_menu_thread = threading.Thread(target=menu.main_menu())
+    main_menu_thread.start()
 
-    match args.mode:
-        case "robot":
-            print("Robot Mode")
-            constants.set_constants(constants.SOFTMODE.PHANTOMX)
-        case "arm":
-            print("Arm Mode")
-            constants.set_constants(constants.SOFTMODE.PHANTOMX)
-        case "simulation":
-            print("Simulation Mode")
-            constants.set_constants(constants.SOFTMODE.PHANTOMX_SIMULATION)
-            simulation.setup_simulation(args.kinematics)
-            simulation.setup_controls()
-            simulation.execute()
-        case "complete":
-            print("Complete Mode (Not handled yet, Exiting...)")
-        case _:
-            print("Error: This mode does not exist")

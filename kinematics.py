@@ -17,17 +17,17 @@ def normalize_angle(angle):
 
 
 def test_normalize():
-    to_test = []
-    expected = []
+    to_test = [0, -math.pi/2, math.pi, math.pi *2, -math.pi *2]
+    expected = [0, -math.pi/2, math.pi, 0, 0]
     failed = 0
     succeded = 0
-    for angle in to_test:
-        func_result = normalize_angle(angle)  
-        if(func_result != expected):
+    for i in range(len(to_test)):
+        func_result = normalize_angle(to_test[i])  
+        if(func_result != expected[i]):
             failed += 1
         else:
             succeded += 1
-    return (f'Failed : {failed} | Succeded : {succeded}')
+    print(f'Failed : {failed} | Succeded : {succeded}')
 
 def computeDK(theta1, theta2, theta3):
     theta1_corrected = constants.THETA1_MOTOR_SIGN * theta1 * constants.TO_DEGREES
@@ -75,9 +75,15 @@ def computeIK(p3_x, p3_y, p3_z):
     theta2 =  a + beta
     theta3 =  math.pi + alpha
 
-    theta1_corrected = normalize_angle(constants.THETA1_MOTOR_SIGN * theta1)
-    theta2_corrected = normalize_angle(constants.THETA2_MOTOR_SIGN * (theta2 + constants.theta2Correction))
-    theta3_corrected = normalize_angle(constants.THETA3_MOTOR_SIGN * (theta3 + constants.theta3Correction))
+    if(constants.ROBOT_TYPE != constants.SOFTMODE.PHANTOMX_SIMULATION):
+        theta1_corrected = normalize_angle(constants.THETA1_MOTOR_SIGN * theta1) * constants.TO_DEGREES
+        theta2_corrected = normalize_angle(constants.THETA2_MOTOR_SIGN * (theta2 + constants.theta2Correction)) * constants.TO_DEGREES
+        theta3_corrected = normalize_angle(constants.THETA3_MOTOR_SIGN * (theta3 + constants.theta3Correction)) * constants.TO_DEGREES
+    else:
+        theta1_corrected = normalize_angle(constants.THETA1_MOTOR_SIGN * theta1)
+        theta2_corrected = normalize_angle(constants.THETA2_MOTOR_SIGN * (theta2 + constants.theta2Correction)) 
+        theta3_corrected = normalize_angle(constants.THETA3_MOTOR_SIGN * (theta3 + constants.theta3Correction)) 
+
     return [theta1_corrected, theta2_corrected, theta3_corrected]
 
 

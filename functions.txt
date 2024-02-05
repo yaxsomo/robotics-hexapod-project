@@ -17,3 +17,7 @@ dxl.get_control_table()               dxl.get_present_voltage()             dxl.
 dxl.get_drive_mode()                  dxl.get_punch()                       dxl.set_drive_mode()                                          
 dxl.get_firmware()                    dxl.get_return_delay_time()           dxl.set_force_control_enable()       
 dxl.get_force_control_enable()        dxl.get_status_return_level()         dxl.set_goal_acceleration()          
+
+Addresses : 
+
+[11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42, 43, 51, 52, 53, 61, 62, 63, 253]

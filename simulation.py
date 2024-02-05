@@ -5,6 +5,9 @@ import pybullet as p
 from onshape_to_robot.simulation import Simulation
 import kinematics
 from scipy.spatial.transform import Rotation
+from main import start_thread
+import readchar
+import threading
 
 # Global variable for simulation mode
 simulation_mode = None
@@ -16,6 +19,10 @@ state = None
 leg_center_pos = [0.1248, -0.06164, 0.001116 + 0.5]
 bx = 0.07
 bz = 0.25
+# Global flag to control the loop
+exit_flag = False
+exit_lock = threading.Lock()  # Lock for ensuring thread-safe access to exit_flag
+
 
 def to_pybullet_quaternion(roll, pitch, yaw, degrees=False):
     # q = Quaternion.from_euler(roll, pitch, yaw, degrees=degrees)
@@ -68,9 +75,23 @@ def setup_controls():
         controls_setup["triangle_duration"] = p.addUserDebugParameter("triangle_duration", 0.01, 10, 3)
     controls = controls_setup
 
+def detect_stop():
+    global exit_flag
+    key_pressed = readchar.readkey()
+    if key_pressed == "q":
+        exit_flag = True
+
+
+
+
+
 def execute():
     global state
     while True:
+        # Check if the exit flag is set
+        with exit_lock:
+            if exit_flag:
+                break  # Exit the loop if the flag is set
         targets = {}
         for name in sim.getJoints():
             if "c1" in name or "thigh" in name or "tibia" in name:
@@ -142,6 +163,32 @@ def execute():
             sim.setJoints(targets)
         
         sim.tick()
+
+
+
+def simulation_init(mode):
+    global listener_thread
+    print("Hey")
+    setup_simulation(mode)
+    if(mode == "move_leg" or mode == "move_robot_center" or mode == "direct" or mode == "inverse"):
+        setup_controls()
+    # start_thread(1)
+    global exit_lock, exit_flag
+    execution_thread = threading.Thread(target=execute())
+    try:
+        
+        # Start the execution thread
+        execution_thread.start()
+
+        # Continue with other operations if needed
+
+    except KeyboardInterrupt:
+        # Handle keyboard interrupt (Ctrl+C) to stop the execution
+        with exit_lock:
+            exit_flag = True
+    finally:
+        execution_thread.join()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
