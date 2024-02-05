@@ -16,6 +16,19 @@ def normalize_angle(angle):
                 return angle
 
 
+def test_normalize():
+    to_test = []
+    expected = []
+    failed = 0
+    succeded = 0
+    for angle in to_test:
+        func_result = normalize_angle(angle)  
+        if(func_result != expected):
+            failed += 1
+        else:
+            succeded += 1
+    return (f'Failed : {failed} | Succeded : {succeded}')
+
 def computeDK(theta1, theta2, theta3):
     theta1_corrected = constants.THETA1_MOTOR_SIGN * theta1 * constants.TO_DEGREES
     theta2_corrected = (constants.THETA2_MOTOR_SIGN * theta2 - constants.theta2Correction) * constants.TO_DEGREES
