@@ -1,7 +1,7 @@
 import constants
 import simulation
 import os
-import robot_physique
+import robot
 
 
 def clear_screen():
@@ -43,7 +43,7 @@ def main_menu():
                     if behaviour_choice == "7":
                         break
                     else:
-                        robot_physique.test()
+                        raise NotImplementedError("Not handled yed.")
                 clear_screen()
             case "2":
                 print("- Simulation Mode -")

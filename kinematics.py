@@ -1,15 +1,12 @@
 import math
-
 import numpy as np
-from scipy.optimize import minimize
-
 from constants import *
 
 
-# Given the sizes (a, b, c) of the 3 sides of a triangle, returns the angle between a and b using the alKashi theorem.
-def alKashi(a, b, c, sign=1):
+# Given the sizes (a, b, c) of the 3 sides of a triangle, returns the angle between a and b using the alkashi theorem.
+def alkashi(a, b, c, sign=1):
     if a * b == 0:
-        print("WARNING a or b is null in AlKashi")
+        print("WARNING a or b is null in alkashi")
         return 0
     # Note : to get the other altenative, simply change the sign of the return :
     return sign * math.acos(min(1, max(-1, (a**2 + b**2 - c**2) / (2 * a * b))))
@@ -18,7 +15,7 @@ def alKashi(a, b, c, sign=1):
 # Computes the direct kinematics of a leg in the leg's frame
 # Given the angles (theta1, theta2, theta3) of a limb with 3 rotational axes separated by the distances (l1, l2, l3),
 # returns the destination point (x, y, z)
-def computeDK(
+def compute_dk(
     theta1,
     theta2,
     theta3,
@@ -47,16 +44,16 @@ def computeDK(
     #     )
     # )
 
-    planContribution = l1 + l2 * math.cos(theta2) + l3 * math.cos(theta2 + theta3)
+    plan_contribution = l1 + l2 * math.cos(theta2) + l3 * math.cos(theta2 + theta3)
 
-    x = math.cos(theta1) * planContribution * dist_unit
-    y = math.sin(theta1) * planContribution * dist_unit
+    x = math.cos(theta1) * plan_contribution * dist_unit
+    y = math.sin(theta1) * plan_contribution * dist_unit
     z = -(l2 * math.sin(theta2) + l3 * math.sin(theta2 + theta3)) * dist_unit
 
     return [x, y, z]
 
 
-def computeDKDetailed(
+def compute_dk_detailed(
     theta1,
     theta2,
     theta3,
@@ -87,10 +84,10 @@ def computeDKDetailed(
         )
     )
 
-    planContribution = l1 + l2 * math.cos(theta2) + l3 * math.cos(theta2 + theta3)
+    plan_contribution = l1 + l2 * math.cos(theta2) + l3 * math.cos(theta2 + theta3)
 
-    x = math.cos(theta1) * planContribution
-    y = math.sin(theta1) * planContribution
+    x = math.cos(theta1) * plan_contribution
+    y = math.sin(theta1) * plan_contribution
     z = -(l2 * math.sin(theta2) + l3 * math.sin(theta2 + theta3))
 
     p0 = [0, 0, 0]
@@ -101,7 +98,7 @@ def computeDKDetailed(
         -l2 * math.sin(theta2) * dist_unit,
     ]
     p3 = [x * dist_unit, y * dist_unit, z * dist_unit]
-    p3_verif = computeDK(
+    p3_verif = compute_dk(
         theta1_verif, theta2_verif, theta3_verif, l1, l2, l3, use_rads, use_mm
     )
     if (p3[0] != p3_verif[0]) or (p3[1] != p3_verif[1]) or (p3[2] != p3_verif[2]):
@@ -117,7 +114,7 @@ def computeDKDetailed(
 # Computes the inverse kinematics of a leg in the leg's frame
 # Given the destination point (x, y, z) of a limb with 3 rotational axes separated by the distances (l1, l2, l3),
 # returns the angles to apply to the 3 axes
-def computeIK(
+def compute_ik(
     x,
     y,
     z,
@@ -145,40 +142,35 @@ def computeIK(
 
     # Distance between the second motor and the projection of the end of the leg on the X/Y plane
     xp = math.sqrt(x * x + y * y) - l1
-    # if xp < 0:
-    #     print("Destination point too close")
-    #     xp = 0
+
 
     # Distance between the second motor arm and the end of the leg
     d = math.sqrt(math.pow(xp, 2) + math.pow(z, 2))
-    # if d > l2 + l3:
-    #     print("Destination point too far away")
-    #     d = l2 + l3
 
     # Knowing l2, l3 and d, theta1 and theta2 can be computed using the Al Kashi law
     # There are 2 solutions for most of the points, forcing a convention here
-    theta2 = alKashi(l2, d, l3, sign=sign) - Z_DIRECTION * math.atan2(z, xp)
-    theta3 = math.pi + alKashi(l2, l3, d, sign=sign)
+    theta2 = alkashi(l2, d, l3, sign=sign) - Z_DIRECTION * math.atan2(z, xp)
+    theta3 = math.pi + alkashi(l2, l3, d, sign=sign)
 
     if use_rads:
         result = [
-            angleRestrict(THETA1_MOTOR_SIGN * theta1, use_rads=use_rads),
-            angleRestrict(
+            normalize_angle(THETA1_MOTOR_SIGN * theta1, use_rads=use_rads),
+            normalize_angle(
                 THETA2_MOTOR_SIGN * (theta2 + theta2Correction), use_rads=use_rads
             ),
-            angleRestrict(
+            normalize_angle(
                 THETA3_MOTOR_SIGN * (theta3 + theta3Correction), use_rads=use_rads
             ),
         ]
 
     else:
         result = [
-            angleRestrict(THETA1_MOTOR_SIGN * math.degrees(theta1), use_rads=use_rads),
-            angleRestrict(
+            normalize_angle(THETA1_MOTOR_SIGN * math.degrees(theta1), use_rads=use_rads),
+            normalize_angle(
                 THETA2_MOTOR_SIGN * (math.degrees(theta2) + theta2Correction),
                 use_rads=use_rads,
             ),
-            angleRestrict(
+            normalize_angle(
                 THETA3_MOTOR_SIGN * (math.degrees(theta3) + theta3Correction),
                 use_rads=use_rads,
             ),
@@ -198,7 +190,7 @@ def computeIK(
     return result
 
 
-def angleRestrict(angle, use_rads=False):
+def normalize_angle(angle, use_rads=False):
     if use_rads:
         return modulopi(angle)
     else:
@@ -234,16 +226,16 @@ def rotation_2d(x, y, z, theta):
 
     return [x_transformed, y_transformed, z]
 
-def computeIKOriented(x, y, z, legID, extra_theta=0):
-    offsetX = 180
-    offsetZ = 100
-    newPos = rotation_2d(x, y, z, -LEG_ANGLES[legID - 1] + extra_theta)
-    newPos[0] += offsetX
-    newPos[2] += offsetZ
-    # print(newPos)
-    return computeIK(newPos[0], newPos[1], newPos[2])
+def compute_ik_oriented(x, y, z, leg_id, extra_theta=0):
+    offset_x = 180
+    offset_z = 100
+    new_position = rotation_2d(x, y, z, -LEG_ANGLES[leg_id - 1] + extra_theta)
+    new_position[0] += offset_x
+    new_position[2] += offset_z
+    # print(new_position)
+    return compute_ik(new_position[0], new_position[1], new_position[2])
 
-def trianglePoints(x, z, h, w):
+def triangle_points(x, z, h, w):
     """
     Takes the geometric parameters of the triangle and returns the position of the 3 points of the triagles. Format : [[x1, y1, z1], [x2, y2, z2], [x3, y3, z3]]
     """
@@ -255,29 +247,29 @@ def triangle(x, z, h, w, t, oriented = False, leg_id = 0, angle_direction = 0):
     Takes the geometric parameters of the triangle and the current time, gives the joint angles to draw the triangle with the tip of th leg. Format : [theta1, theta2, theta3]
     """
     T = 1
-    Tbase = 0.5*T
-    Tcote = 0.25*T
+    triangle_base = 0.5*T
+    triangle_side = 0.25*T
     
     t2 = math.fmod(t, T)
     
-    points = trianglePoints(x, z, h, w)
+    points = triangle_points(x, z, h, w)
     
-    if t2 < Tbase: 
-        periode = Tbase
+    if t2 < triangle_base: 
+        periode = triangle_base
         index1 = 1
         index2 = 2
         T = t2 / periode 
-    elif t2 < (Tbase + Tcote):
-        periode = Tcote
+    elif t2 < (triangle_base + triangle_side):
+        periode = triangle_side
         index1 = 2
         index2 = 0
-        T = t2 - Tbase
+        T = t2 - triangle_base
         T = T / periode
     else:
-        periode = Tcote
+        periode = triangle_side
         index1 = 0
         index2 = 1
-        T = t2 - Tbase - Tcote
+        T = t2 - triangle_base - triangle_side
         T = T / periode
         
     # Sélecti on de deux points
@@ -287,8 +279,7 @@ def triangle(x, z, h, w, t, oriented = False, leg_id = 0, angle_direction = 0):
     # Interpolation entre les deux points
     
     pos = P2 * T + (1 - T) * P1
-    print(T)
     if oriented:
-        return computeIKOriented(pos[0], pos[1], pos[2], leg_id, extra_theta=angle_direction)
+        return compute_ik_oriented(pos[0], pos[1], pos[2], leg_id, extra_theta=angle_direction)
     else:
-        return computeIK(pos[0], pos[1], pos[2])
+        return compute_ik(pos[0], pos[1], pos[2])
