@@ -7,7 +7,7 @@ Also, to maintain compatibility with legacy code, the user can chose whether the
 Values in this file should however always be written in meters and in rads.
 """
 
-class BEHAVIOUR_MODE(Enum):
+class behaviour_mode(Enum):
     move_leg = 1
     move_robot_center = 2
     robot_walk = 3
