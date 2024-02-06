@@ -1,10 +1,13 @@
-import control
 import kinematics
 import time
 import numpy as np
 import constants
 import traceback
 import math
+import pypot.dynamixel
+
+available_ports = None
+dxl = None
 
 """Class Robot : This class serve to define the common attributes and methods for the Simulation and Physical Robot"""
 class Robot:
@@ -145,7 +148,7 @@ class robot_physical(Robot):
                     for _,motors in self.legs.items(): # Key:value For-loop in the 'self.legs' array
                         motors_group = [] # 3 element array initialization (leg motors)
                         for single_motor in motors: #For-loop in the leg's motors ids
-                            temp = control.dxl.get_present_position([single_motor]) # Calling dxl to gather the present position of a single motor
+                            temp = dxl.get_present_position([single_motor]) # Calling dxl to gather the present position of a single motor
                             if single_motor in constants.LIST_OF_INVERTED_IDS: # Checks if the motor id is present in the 'LIST_OF_INVERTED_IDS' constant
                                 motors_group.append(-temp[0]) # True case : It inverts the motor present position value and adds it to the motor group array
                             else:
@@ -153,7 +156,7 @@ class robot_physical(Robot):
                         result.append(motors_group) # Once it has looped through the 3 motors of each leg, it appends the motor group to the final result array    
                     return result # Returns the final result array, containing all the motors position
                 case _: # In this case, we assume that we have specified a 'leg_id', so we will read positions to only one leg
-                    return control.dxl.get_present_position([leg_id]) # Returns the 3 motors positions of one leg 
+                    return dxl.get_present_position([leg_id]) # Returns the 3 motors positions of one leg 
         except Exception: # Exception handling
             print(traceback.format_exc()) # Traceback print
 
@@ -166,7 +169,7 @@ class robot_physical(Robot):
                     result_dict[key] = -value # True case : It inverts the motor goal position value and adds it to the final result dictionnary
                 else:
                     result_dict[key] = value # False case : It simply appends the motor goal position value in the final result dictionnary, unchanged.
-            control.dxl.set_goal_position(result_dict) # Writes the positions of one or all the motors after the For-loop
+            dxl.set_goal_position(result_dict) # Writes the positions of one or all the motors after the For-loop
         except Exception: # Exception Handling
             print(traceback.format_exc()) # Traceback print
     
@@ -189,3 +192,24 @@ class robot_simulation(Robot):
     def write(self, new_positions):
         """write() : This method writes positions to one or all the motors."""
         raise NotImplementedError("robot_simulation:write() -> Method not implemented yet.")
+
+
+
+def robot_serial_init():
+    global available_ports, dxl
+    try:
+        available_ports = pypot.dynamixel.get_available_ports()
+        print(available_ports)
+        print("Opening connection to the robot..")
+        dxl = pypot.dynamixel.DxlIO(available_ports[0], baudrate=1000000)
+    except Exception:
+        print(traceback.format_exc())
+
+
+def get_motors_list_physical():
+    try:
+        print("Scanning..")
+        result = dxl.scan()
+        return(result)
+    except Exception:
+        print(traceback.format_exc())
