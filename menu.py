@@ -1,7 +1,7 @@
 import constants
 import simulation
 import os
-import threading
+import robot_physique
 
 
 def clear_screen():
@@ -27,7 +27,7 @@ def print_behaviour_choice():
 def main_menu():
     while(True):
         
-        print("Select Software Mode :")
+        print("- Select Software Mode : -")
         print("1. Robot")
         print("2. Simulation")
         print("3. Exit")
@@ -36,14 +36,17 @@ def main_menu():
 
         match choice:
             case "1":
-                print("Robot Mode")
+                print("- Robot Mode -")
                 constants.set_constants(constants.SOFTMODE.PHANTOMX)
                 while(True):
                     behaviour_choice = print_behaviour_choice()
-                    if behaviour_choice == "5":
+                    if behaviour_choice == "7":
                         break
+                    else:
+                        robot_physique.test()
+                clear_screen()
             case "2":
-                print("Simulation Mode")
+                print("- Simulation Mode -")
                 constants.set_constants(constants.SOFTMODE.PHANTOMX_SIMULATION)
                 while(True):
                     behaviour_choice = print_behaviour_choice()

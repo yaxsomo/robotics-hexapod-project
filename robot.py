@@ -2,6 +2,7 @@
 # import constants
 # import control
 # import simulation
+import robot_physique
 
 # class Motor:
 #     motor_id = 0
@@ -59,6 +60,8 @@
 #      # Constructor 
 #     def __init__(self, legs = None):
 #         self.legs = legs
+
+
     
     
         

@@ -4,7 +4,6 @@ import math
 import kinematics
 import constants
 import robot
-from menu import clear_screen
 
 available_ports = None
 dxl = None
@@ -14,11 +13,13 @@ legs = None
 def control_init():
     global available_ports, dxl, motor_id_list
     available_ports = pypot.dynamixel.get_available_ports()
+    print(available_ports)
     print("Opening connection to the robot..")
     dxl = pypot.dynamixel.DxlIO(available_ports[0], baudrate=1000000)
-    print("Scanning..")
-    motor_id_list = dxl.scan()
-    motor_id_list.pop()
+    # print("Scanning..")
+    # motor_id_list = dxl.scan()
+    # print(motor_id_list)
+    # motor_id_list.pop()
 
 
 def create_legs():
@@ -64,5 +65,3 @@ def test():
     # time.sleep(1)
     # print(dxl.get_present_position([21,22,23]))
 
-if __name__ == "__main__":
-    test()
