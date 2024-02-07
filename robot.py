@@ -56,7 +56,7 @@ class Robot:
     def set_robot_initial_position(self):
         """set_robot_initial_position() : This method moves the hexapod to its initial position."""
         try:
-            self.interpolation(self.INITIAL_POSITION, 1)  # Makes a linear interpolation from the motors current position to the initial position
+            self.interpolate(self.INITIAL_POSITION, 1)  # Makes a linear interpolation from the motors current position to the initial position
         except Exception: # Exception handling
             print(traceback.format_exc()) # Traceback print
     
@@ -199,17 +199,19 @@ def robot_serial_init():
     global available_ports, dxl
     try:
         available_ports = pypot.dynamixel.get_available_ports()
-        print(available_ports)
         print("Opening connection to the robot..")
         dxl = pypot.dynamixel.DxlIO(available_ports[0], baudrate=1000000)
+        return constants.execution.serial_connection_success.value[0], constants.execution.serial_connection_success.value[1]
     except Exception:
         print(traceback.format_exc())
+        return constants.execution.serial_connection_error.value[0], constants.execution.serial_connection_error.value[1]
 
-
-def get_motors_list_physical():
+def scan_motors():
     try:
         print("Scanning..")
         result = dxl.scan()
-        return(result)
+        print(result)
+        return constants.execution.motor_scan_success.value[0], constants.execution.motor_scan_success.value[1]
     except Exception:
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
+        return constants.execution.motor_scan_error.value[0], constants.execution.motor_scan_error.value[1]

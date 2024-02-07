@@ -7,6 +7,17 @@ Also, to maintain compatibility with legacy code, the user can chose whether the
 Values in this file should however always be written in meters and in rads.
 """
 
+class execution(Enum):
+    # Operation Success Codes
+    successful = (0, "Operation Successful")
+    serial_connection_success = (2, "Serial Connection Successful")
+    motor_scan_success = (3, "Motor Scan Successful")
+    
+    # Operation Error Codes
+    error = (-1, "Operation Error")
+    serial_connection_error = (-2, "Serial Connection Error")
+    motor_scan_error = (-3, "Motor Scan Error")
+
 class behaviour_mode(Enum):
     move_leg = 1
     move_robot_center = 2
