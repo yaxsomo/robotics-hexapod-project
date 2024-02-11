@@ -23,8 +23,6 @@ class behaviour_mode(Enum):
     move_robot_center = 2
     robot_walk = 3
     robot_rotate = 4
-    direct = 5
-    inverse = 6
 
 
 class SOFTMODE(Enum):
@@ -33,7 +31,8 @@ class SOFTMODE(Enum):
 
 AX12 = "AX12"
 MOTOR_TYPE = AX12
-ROBOT_TYPE = SOFTMODE.PHANTOMX
+ROBOT_TYPE = SOFTMODE.PHANTOMX_SIMULATION
+BEHAVIOUR = behaviour_mode.move_leg
 USING_SIMPLE_ROBOT = True
 USE_RADS_INPUT = False
 USE_RADS_OUTPUT = False
@@ -43,6 +42,10 @@ LIST_OF_INVERTED_IDS = []
 DEFAULT_COMPUTE_IK_SIGN = -1
 
 
+def set_behaviour_mode(new_behaviour):
+    global BEHAVIOUR
+    BEHAVIOUR = new_behaviour
+    
 def set_constants(robot_type):
     global ROBOT_TYPE, constL1, constL2, constL3, theta2Correction, theta3Correction,theta2ExtraCorrection, \
         THETA3_MOTOR_SIGN, THETA2_MOTOR_SIGN, THETA1_MOTOR_SIGN, \

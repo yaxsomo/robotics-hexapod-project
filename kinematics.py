@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from constants import *
+from scipy.spatial.transform import Rotation
 
 
 # Given the sizes (a, b, c) of the 3 sides of a triangle, returns the angle between a and b using the alkashi theorem.
@@ -229,6 +230,8 @@ def rotation_2d(x, y, z, theta):
 def compute_ik_oriented(x, y, z, leg_id, extra_theta=0):
     offset_x = 180
     offset_z = 100
+    # offset_x = 0.20
+    # offset_z = -0.10
     new_position = rotation_2d(x, y, z, -LEG_ANGLES[leg_id - 1] + extra_theta)
     new_position[0] += offset_x
     new_position[2] += offset_z
@@ -283,3 +286,16 @@ def triangle(x, z, h, w, t, oriented = False, leg_id = 0, angle_direction = 0):
         return compute_ik_oriented(pos[0], pos[1], pos[2], leg_id, extra_theta=angle_direction)
     else:
         return compute_ik(pos[0], pos[1], pos[2])
+
+
+def to_quaternion(roll, pitch, yaw, degrees=False):
+    # q = Quaternion.from_euler(roll, pitch, yaw, degrees=degrees)
+    # return [q[1], q[2], q[3], q[0]]
+
+    # Create a rotation object from Euler angles specifying axes of rotation
+    rot = Rotation.from_euler("xyz", [roll, pitch, yaw], degrees=degrees)
+
+    # Convert to quaternions and print
+    rot_quat = rot.as_quat()
+    # print(rot_quat)
+    return rot_quat
